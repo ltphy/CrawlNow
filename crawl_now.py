@@ -67,7 +67,6 @@ def handle_crawl(url):
         menu_list.append(category_dict)
         print("MENU DICT", menu_list)
                             
-
     driver.quit()
 URL="https://www.now.vn/ho-chi-minh/lotteria-nguyen-van-nghi"
 handle_crawl(URL)
