@@ -3,6 +3,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import pickle
 class HandleNow:
     def __init__(self, signin_url, user_info):
         options = webdriver.ChromeOptions()
@@ -10,16 +11,28 @@ class HandleNow:
         options.add_argument('--kiosk')
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--ignore-ssl-errors')
+        #user-data-dir=> to create selenium folder. 
+        options.add_argument('--user-data-dir=selenium')
+        # options.add_argument("user-data-dir=C:/Users/phyli/AppData/Local/Google/Chrome/User Data")
+        #using a new profile data
+        # options.add_argument("profile-directory=Profile 1")
 
-        
         self.driver = webdriver.Chrome('C:\driver\chromedriver.exe', options=options)
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
         self.handle_signin(signin_url, user_info)
 
-    def handle_signin(self,signin_url, user_info):
+    def handle_signin(self, signin_url, user_info):
+        
         self.driver.get(signin_url)
-        login_element = self.driver.find_element_by_class_name("form-login-input")
+        cookie = self.driver.get_cookies()
+        print("COOKIE", cookie)
+        try: 
+            login_element = wait(self.driver, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "form-login-input"))
+            )
+        except:
+            return
         
         username = login_element.find_element_by_xpath("//div[@class='field-group']/div[@class='input-group'][1]/input[@type='text']")
         if(username):
@@ -35,9 +48,22 @@ class HandleNow:
             print("CANNOT GET ELEMENT")
             return
         login_element.find_element_by_css_selector("button.btn-submit").click()
+        print("SUCCESSFULLY LOGIN!")
+        self.save_cookie('cookie.pkl')
+
+    def save_cookie(self, path):
+        with open(path, 'wb') as filehandler:
+            pickle.dump(self.driver.get_cookies(), filehandler)
+
+    def load_cookie(self, path):
+        with open(path, 'rb') as cookiefile:
+            cookies = pickle.load(cookiefile)
+            for cookie in cookies:
+                print("COOKIE", cookie)
+                self.driver.add_cookie(cookie)
 
     def handle_crawl(self, url):
-       
+        self.load_cookie('cookie.pkl')
         self.driver.get(url)
         #get category menu list
         # category_list = driver.find_element_by_class_name('menu-restaurant-category')
@@ -98,7 +124,7 @@ def read_user_information(filename):
         user_info = {"username": user_name, "password":password}
     return user_info
 
-URL="https://www.now.vn/ho-chi-minh/lotteria-nguyen-van-nghi"
+URL="https://www.now.vn/ho-chi-minh/larva-mi-cay-an-vat"
 signin_URL="https://www.now.vn/account/login"
 user_info_file = "user_information.txt"
 user_info = read_user_information(user_info_file)
