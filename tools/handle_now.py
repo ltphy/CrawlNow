@@ -92,28 +92,31 @@ class HandleNow:
     def save_values_to_xml_file(self,file_name,food_items, topping_items):
         excel_file_name = file_name
         items = []
-        column_keys = ['food name','current price', 'category', 'description', 'category_name']
+        column_keys = ['food name','current price', 'description', 'category_name','topping category']
         for category_list in food_items:
             category_name = category_list['category_name']
             food_list = category_list['food_list']
             for food in food_list:
-                item = [food.get('food_name',''),int(food.get('current_price','').replace(",","")),food.get('description',''),food.get('topping_category',''), category_name]
+                item = [food.get('food_name',''),int(food.get('current_price','').replace(",","")),food.get('description',''), category_name, food.get('topping_category','')]
                 items.append(item)
-        df1 = pd.DataFrame(items, columns = column_keys, index = False)
+        df_food = pd.DataFrame(items, columns = column_keys)
         column_keys = ['topping title', 'topping name', 'topping price']
-        for (topping_type in topping_items):
+        df_topping_list = []
+        for topping_type in topping_items:
             #each topping type have many category topping title
             topping_items = []
-            for(topping_category in topping_type ):
+            for topping_category in topping_type:
                 category = topping_category['topping_title']
                 topping_list_items = topping_category['topping_items']
-                for(item in topping_list_items):
-                    topping_item = [item['topping_name'], item['topping_price'], category]
-            
-            df1 = pd.DataFrame(topping_items, columns = column_keys, index = False)
-            
-        
-        df1.to_excel(excel_file_name)
+                for item in topping_list_items:
+                    topping_item = [item.get('topping_name',''), item.get('topping_price',''), category]
+                    topping_items.append(topping_item)
+            df1 = pd.DataFrame(topping_items, columns = column_keys)
+            df_topping_list.append(df1)
+        with pd.ExcelWriter(excel_file_name) as writer:
+            df_food.to_excel(writer,sheet_name="food")
+            for i, df_topping in enumerate(df_topping_list):
+                df_topping.to_excel(writer, sheet_name="category_"+str(i))
 
         category_dict = food_items[0].keys()
         
@@ -183,17 +186,19 @@ class HandleNow:
                             #update food to the current menu content
                             food_name = food_element.find_element_by_class_name('item-restaurant-name')
                             current_price = food_element.find_element_by_class_name('current-price')
+                            description_text = ""
                             try:
                                 description = food_element.find_element_by_class_name('item-restaurant-desc')
+                                description_text = description.text
                             except:
-                            
+                                print("no description")
                             #wait until food element containing bt-adding can be clickable
                             plus_element = wait(food_element, 3).until(
                                 EC.element_to_be_clickable((By.CLASS_NAME, "btn-adding"))
                             )
                             actions = ActionChains(self.driver)
                             print("{}: {}".format(food_name.text, current_price.text))
-                            food_item = {'food_name': food_name.text, 'current_price': (current_price.text).replace("đ",""), 'description': description.text}
+                            food_item = {'food_name': food_name.text, 'current_price': (current_price.text).replace("đ",""), 'description': description_text}
                             #show topping modal
                             print("PLUS ELEMENT: ", plus_element.text)
                             #dont know why this one cant click for those first item? 1
