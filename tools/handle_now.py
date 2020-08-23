@@ -55,7 +55,7 @@ class HandleNow:
             print("CANNOT GET ELEMENT")
             return
         login_element.find_element_by_css_selector("button.btn-submit").click()
-        time.sleep(10)
+        time.sleep(5)
         print("SUCCESSFULLY LOGIN!")
         self.save_cookie('cookie.pkl')
         # self.driver.quit()
@@ -99,16 +99,15 @@ class HandleNow:
     def save_values_to_xml_file(self,file_name,food_items, topping_items):
         excel_file_name = file_name
         items = []
-        column_keys = ['food name','current price', 'description', 'category_name','topping category']
+        column_keys = ['food name','current price', 'description', 'category title','topping category']
         for category_list in food_items:
             category_name = category_list['category_name']
             food_list = category_list['food_list']
             for food in food_list:
-                print("CONTENT", food)
                 item = [food.get('food_name',''),int(food.get('current_price','').replace(",","")),food.get('description',''), category_name, food.get('topping_category','')]
                 items.append(item)
         df_food = pd.DataFrame(items, columns = column_keys)
-        column_keys = ['topping title', 'topping name', 'topping price']
+        column_keys = ['topping name', 'topping price', 'topping title']
         df_topping_list = []
         for topping_type in topping_items:
             #each topping type have many category topping title
@@ -117,7 +116,7 @@ class HandleNow:
                 category = topping_category['topping_title']
                 topping_list_items = topping_category['topping_items']
                 for item in topping_list_items:
-                    topping_item = [item.get('topping_name',''), item.get('topping_price',''), category]
+                    topping_item = [item.get('topping_name',''), int(item.get('topping_price','').replace(",",""))), category]
                     topping_items.append(topping_item)
             df1 = pd.DataFrame(topping_items, columns = column_keys)
             df_topping_list.append(df1)
@@ -268,7 +267,8 @@ class HandleNow:
             menu_list.append(category_dict)
             # print("FINAL MENU DICT", menu_list)
             # print("FINAL TOPPING LIST", topping_list)              
-
+        reset_value = self.driver.find_element_by_css_selector("button.btn-reset")
+        reset_value.click()
         self.driver.quit()
         print("FINAL MENU DICT", menu_list)
         print("FINAL TOPPING LIST", topping_list)                    

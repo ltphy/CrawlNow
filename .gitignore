@@ -8,3 +8,5 @@ dist/
 *.manifest
 __pycache__
 build/
+.vscode
+*.xlsx
