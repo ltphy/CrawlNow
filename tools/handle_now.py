@@ -33,13 +33,18 @@ class HandleNow:
         
         self.driver.get(signin_url)
 
-        print("COOKIE", self.driver.get_cookies())
+        # if(self.driver.get_cookies()):
+        #     return True
         try: 
-            login_element = wait(self.driver, 5).until(
+            login_element = wait(self.driver, 3).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "form-login-input"))
             )
         except:
-            return
+            #if redirect to main page mean already logged in
+            if "account/login" not in current_website:
+                print ("USE COOKIE")
+                return True
+            return False
         
         username = login_element.find_element_by_xpath("//div[@class='field-group']/div[@class='input-group'][1]/input[@type='text']")
         if(username):
@@ -47,17 +52,25 @@ class HandleNow:
             username.send_keys(user_info['username'])
         else: 
             print("CANNOT GET ELEMENT")
-            return
+            return False
         password = login_element.find_element_by_xpath("//div[@class='field-group']/div[@class='input-group'][2]/input[@type='password']")
         if(password):
             password.send_keys(user_info['password'])
         else:
             print("CANNOT GET ELEMENT")
-            return
+            return False
         login_element.find_element_by_css_selector("button.btn-submit").click()
         time.sleep(5)
+        #check wheter it redirect to home page 
+        current_website = self.driver.current_url
+        #redirect to homepage mean login successfully
+        if "account/login" in current_website:
+            print ("LOGIN FAILED")
+            self.driver.quit()
+            return False
         print("SUCCESSFULLY LOGIN!")
         self.save_cookie('cookie.pkl')
+        return True
         # self.driver.quit()
     def save_cookie(self, path):
         with open(path, 'wb') as filehandler:
