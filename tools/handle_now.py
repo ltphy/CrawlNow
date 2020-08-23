@@ -16,15 +16,14 @@ class HandleNow:
         options.add_argument('--ignore-ssl-errors')
         #user-data-dir=> to create selenium folder. 
         options.add_argument('--user-data-dir=selenium') 
-        # options.add_argument("--user-data-dir=C:/Users/phyli/AppData/Local/Google/Chrome/User Data")
-        # caps = webdriver.DesiredCapabilities.CHROME.copy()
-        # caps['acceptInsecureCerts'] = True
         #using a new profile data
-        
         options.add_argument("--profile-directory=Profile 1")
-
-        self.driver = webdriver.Chrome(chrome_driver_path, options=options)
-        # self.driver = webdriver.Firefox('C:\driver\geckodriver.exe', options=options)
+      
+        try:    
+            self.driver = webdriver.Chrome(chrome_driver_path, options=options)
+        except:
+            print("Please check your chrome driver path!")
+            exit()
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
         
@@ -33,13 +32,19 @@ class HandleNow:
         
         self.driver.get(signin_url)
 
-        print("COOKIE", self.driver.get_cookies())
+        # if(self.driver.get_cookies()):
+        #     return True
         try: 
-            login_element = wait(self.driver, 5).until(
+            login_element = wait(self.driver, 3).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "form-login-input"))
             )
         except:
-            return
+            #if redirect to main page mean already logged in
+            current_website = self.driver.current_url
+            if "account/login" not in current_website:
+                print ("USE COOKIE")
+                return True
+            return False
         
         username = login_element.find_element_by_xpath("//div[@class='field-group']/div[@class='input-group'][1]/input[@type='text']")
         if(username):
@@ -47,17 +52,25 @@ class HandleNow:
             username.send_keys(user_info['username'])
         else: 
             print("CANNOT GET ELEMENT")
-            return
+            return False
         password = login_element.find_element_by_xpath("//div[@class='field-group']/div[@class='input-group'][2]/input[@type='password']")
         if(password):
             password.send_keys(user_info['password'])
         else:
             print("CANNOT GET ELEMENT")
-            return
+            return False
         login_element.find_element_by_css_selector("button.btn-submit").click()
         time.sleep(5)
+        #check wheter it redirect to home page 
+        current_website = self.driver.current_url
+        #redirect to homepage mean login successfully
+        if "account/login" in current_website:
+            print ("LOGIN FAILED")
+            self.driver.quit()
+            return False
         print("SUCCESSFULLY LOGIN!")
         self.save_cookie('cookie.pkl')
+        return True
         # self.driver.quit()
     def save_cookie(self, path):
         with open(path, 'wb') as filehandler:
@@ -133,6 +146,7 @@ class HandleNow:
     def handle_crawl(self, url):
         self.load_cookie('cookie.pkl')
         self.driver.get(url)
+        #check this url exist 
         #get category menu list
         # category_list = driver.find_element_by_class_name('menu-restaurant-category')
         try:
@@ -140,7 +154,7 @@ class HandleNow:
             # popup_modal = find_elements_by_xpath('//*[@id="modal"]')
             #https://stackoverflow.com/questions/59130200/selenium-wait-until-element-is-present-visible-and-interactable
             #visibitity located on the page (got height and width)
-            popup_modal = wait(self.driver, 5).until(
+            popup_modal = wait(self.driver, 3).until(
             EC.visibility_of_element_located((By.ID, "modal"))
             )
             active_modal = popup_modal.find_element_by_css_selector("div.is-active")
@@ -152,9 +166,14 @@ class HandleNow:
             btn_ok.click()
         except:
             print("No pop up modal")
-        category_list = wait(self.driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "menu-restaurant-category"))
-        )
+        try:
+            category_list = wait(self.driver, 3).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "menu-restaurant-category"))
+            )
+        except:
+            print("Invalid URL")
+            self.driver.quit()
+            exit()
         category_values = category_list.find_elements_by_css_selector('span.item-link')
         # print(category_list.text)
         #get all the ite
