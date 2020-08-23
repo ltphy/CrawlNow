@@ -1,1 +1,1 @@
-C:/driver/
+C:/driver/chromedriver.exe

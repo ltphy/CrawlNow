@@ -154,7 +154,7 @@ class HandleNow:
             # popup_modal = find_elements_by_xpath('//*[@id="modal"]')
             #https://stackoverflow.com/questions/59130200/selenium-wait-until-element-is-present-visible-and-interactable
             #visibitity located on the page (got height and width)
-            popup_modal = wait(self.driver, 5).until(
+            popup_modal = wait(self.driver, 3).until(
             EC.visibility_of_element_located((By.ID, "modal"))
             )
             active_modal = popup_modal.find_element_by_css_selector("div.is-active")
@@ -166,9 +166,14 @@ class HandleNow:
             btn_ok.click()
         except:
             print("No pop up modal")
-        category_list = wait(self.driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "menu-restaurant-category"))
-        )
+        try:
+            category_list = wait(self.driver, 3).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "menu-restaurant-category"))
+            )
+        except:
+            print("Invalid URL")
+            self.driver.quit()
+            exit()
         category_values = category_list.find_elements_by_css_selector('span.item-link')
         # print(category_list.text)
         #get all the ite
