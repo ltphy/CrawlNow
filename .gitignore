@@ -1,1 +1,12 @@
 user_information.txt
+selenium/
+*.pkl
+debug
+dist/
+*.spec
+*.exe
+*.manifest
+__pycache__
+build/
+.vscode
+*.xlsx
