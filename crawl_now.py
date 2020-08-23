@@ -1,13 +1,14 @@
-import requests
 from tools.handle_now import HandleNow
 import helper
 if __name__ == "__main__":    
     signin_URL="https://www.now.vn/account/login"
     user_info_file = "user_information.txt"
-    url = "url.txt"
-    website_name = helper.read_now_web(url)
+    url_file = "url.txt"
+    chrome_file = "chrome_driver.txt"
+    website_name = helper.read_file(url_file)
+    chrome_driver = helper.read_file(chrome_file)
     user_info = helper.read_user_information(user_info_file)
-    handleNow = HandleNow()
+    handleNow = HandleNow(chrome_driver)
     
     handleNow.handle_signin(signin_URL, user_info)
     # handleNow = HandleNow()

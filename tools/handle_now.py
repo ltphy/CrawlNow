@@ -8,7 +8,7 @@ import pickle
 import pandas as pd
 import time
 class HandleNow:
-    def __init__(self):
+    def __init__(self, chrome_driver_path):
         options = webdriver.ChromeOptions()
         #enable full screen 
         options.add_argument('--kiosk')
@@ -23,7 +23,7 @@ class HandleNow:
         
         options.add_argument("--profile-directory=Profile 1")
 
-        self.driver = webdriver.Chrome('C:/driver/chromedriver.exe', options=options)
+        self.driver = webdriver.Chrome(chrome_driver_path, options=options)
         # self.driver = webdriver.Firefox('C:\driver\geckodriver.exe', options=options)
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
@@ -83,13 +83,13 @@ class HandleNow:
             for topping_check_box in topping_check_boxes:
                 topping_check_box_item = {}
                 #get input name
-                print("TOPPING CHECK BOX", topping_check_box.text)
+                # print("TOPPING CHECK BOX", topping_check_box.text)
                 price = topping_check_box.find_element_by_css_selector('span.topping-item-price')
                 price_text = price.text
                 name_text = (topping_check_box.text).replace(price_text,"")
                 topping_check_box_item = {'topping_name': name_text}
-                print("NAME: ", name_text)
-                print("PRICE: ", price_text)
+                # print("NAME: ", name_text)
+                # print("PRICE: ", price_text)
                 if(price_text):
                     topping_check_box_item.update({'topping_price': (price_text).replace("đ","")})
                 topping_items.append(topping_check_box_item)
@@ -104,6 +104,7 @@ class HandleNow:
             category_name = category_list['category_name']
             food_list = category_list['food_list']
             for food in food_list:
+                print("CONTENT", food)
                 item = [food.get('food_name',''),int(food.get('current_price','').replace(",","")),food.get('description',''), category_name, food.get('topping_category','')]
                 items.append(item)
         df_food = pd.DataFrame(items, columns = column_keys)
@@ -191,12 +192,19 @@ class HandleNow:
                         if new_menu_flag:
                             
                             #update food to the current menu content
-                            food_name = food_element.find_element_by_class_name('item-restaurant-name')
-                            current_price = food_element.find_element_by_class_name('current-price')
+                            food_name = wait(food_element, 3).until(
+                                    EC.visibility_of_element_located((By.CLASS_NAME, "item-restaurant-name"))
+                                )
+                            current_price =  wait(food_element, 3).until(
+                                    EC.visibility_of_element_located((By.CLASS_NAME, "current-price"))
+                                )
                             description_text = ""
                             try:
-                                description = food_element.find_element_by_class_name('item-restaurant-desc')
+                                description = wait(food_element, 3).until(
+                                    EC.visibility_of_element_located((By.CLASS_NAME, "item-restaurant-desc"))
+                                )
                                 description_text = description.text
+
                             except:
                                 print("no description")
                             #wait until food element containing bt-adding can be clickable
@@ -204,8 +212,9 @@ class HandleNow:
                                 EC.element_to_be_clickable((By.CLASS_NAME, "btn-adding"))
                             )
                             actions = ActionChains(self.driver)
-                            print("{}: {}".format(food_name.text, current_price.text))
-                            food_item = {'food_name': food_name.text, 'current_price': (current_price.text).replace("đ",""), 'description': description_text}
+                            food_name_text = food_name.text
+               
+                            food_item = {'food_name': food_name_text, 'current_price': (current_price.text).replace("đ",""), 'description': description_text}
                             #show topping modal
                             print("PLUS ELEMENT: ", plus_element.text)
                             #dont know why this one cant click for those first item? 1
@@ -217,7 +226,7 @@ class HandleNow:
                             #find topping category #should wait it present and appear?
                             try:
                                 print("START TO GET TOPPING")
-                                modal_element = wait(self.driver, 1).until(
+                                modal_element = wait(self.driver, 5).until(
                                     EC.visibility_of_element_located((By.ID, "modal-topping"))
                                 )
                                 topping_category = modal_element.find_element_by_class_name('topping-category')
