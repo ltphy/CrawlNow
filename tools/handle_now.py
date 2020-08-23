@@ -116,7 +116,10 @@ class HandleNow:
                 category = topping_category['topping_title']
                 topping_list_items = topping_category['topping_items']
                 for item in topping_list_items:
-                    topping_item = [item.get('topping_name',''), int(item.get('topping_price','').replace(",",""))), category]
+                    topping_price = item.get('topping_price','').replace(",","")
+                    if(topping_price != ""):
+                        topping_price = int(topping_price)
+                    topping_item = [item.get('topping_name',''), topping_price , category]
                     topping_items.append(topping_item)
             df1 = pd.DataFrame(topping_items, columns = column_keys)
             df_topping_list.append(df1)
