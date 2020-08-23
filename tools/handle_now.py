@@ -69,7 +69,7 @@ class HandleNow:
             self.driver.quit()
             return False
         print("SUCCESSFULLY LOGIN!")
-        self.save_cookie('cookie.pkl')
+        # self.save_cookie('cookie.pkl')
         return True
         # self.driver.quit()
     def save_cookie(self, path):
@@ -144,7 +144,7 @@ class HandleNow:
         category_dict = food_items[0].keys()
         
     def handle_crawl(self, url):
-        self.load_cookie('cookie.pkl')
+        # self.load_cookie('cookie.pkl')
         self.driver.get(url)
         #check this url exist 
         #get category menu list
