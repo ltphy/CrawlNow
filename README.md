@@ -4,7 +4,7 @@ A crawler application to get food information along with toppings details from N
 
 ## Installation
 
-- A pre-built application for this project using pyinstaller can be downloaded [here](https://drive.google.com/file/d/121yusuesCjUTCF_93MCt4aMpxTnBcWlV/view).
+- A pre-built application for this project using pyinstaller can be downloaded [here](https://drive.google.com/file/d/1AC-P2BtYduAugzuBBNIPjVLKjeeKpVyZ/view).
 
 - Check your current [chrome driver version](https://www.whatismybrowser.com/detect/what-version-of-chrome-do-i-have) and download a suitable one from [chrome driver website](https://chromedriver.chromium.org/downloads).
 
