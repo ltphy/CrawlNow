@@ -16,15 +16,14 @@ class HandleNow:
         options.add_argument('--ignore-ssl-errors')
         #user-data-dir=> to create selenium folder. 
         options.add_argument('--user-data-dir=selenium') 
-        # options.add_argument("--user-data-dir=C:/Users/phyli/AppData/Local/Google/Chrome/User Data")
-        # caps = webdriver.DesiredCapabilities.CHROME.copy()
-        # caps['acceptInsecureCerts'] = True
         #using a new profile data
-        
         options.add_argument("--profile-directory=Profile 1")
-
-        self.driver = webdriver.Chrome(chrome_driver_path, options=options)
-        # self.driver = webdriver.Firefox('C:\driver\geckodriver.exe', options=options)
+      
+        try:    
+            self.driver = webdriver.Chrome(chrome_driver_path, options=options)
+        except:
+            print("Please check your chrome driver path!")
+            exit()
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
         
@@ -41,6 +40,7 @@ class HandleNow:
             )
         except:
             #if redirect to main page mean already logged in
+            current_website = self.driver.current_url
             if "account/login" not in current_website:
                 print ("USE COOKIE")
                 return True
@@ -146,6 +146,7 @@ class HandleNow:
     def handle_crawl(self, url):
         self.load_cookie('cookie.pkl')
         self.driver.get(url)
+        #check this url exist 
         #get category menu list
         # category_list = driver.find_element_by_class_name('menu-restaurant-category')
         try:

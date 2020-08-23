@@ -1,5 +1,6 @@
 from tools.handle_now import HandleNow
 from tools import helper
+import os
 if __name__ == "__main__":    
     signin_URL="https://www.now.vn/account/login"
     user_info_file = "user_information.txt"
@@ -8,6 +9,10 @@ if __name__ == "__main__":
     website_name = helper.read_file(url_file)
     chrome_driver = helper.read_file(chrome_file)
     user_info = helper.read_user_information(user_info_file)
+    #check this path exist
+    if(not os.path.exists(chrome_driver)):
+        print("WRONG CHROME PATH")
+        exit()
     handleNow = HandleNow(chrome_driver)
     
     is_login = handleNow.handle_signin(signin_URL, user_info)
