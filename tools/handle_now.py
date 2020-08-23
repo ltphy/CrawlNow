@@ -6,27 +6,33 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pickle
 import pandas as pd
+import time
 class HandleNow:
-    def __init__(self, signin_url, user_info):
+    def __init__(self):
         options = webdriver.ChromeOptions()
         #enable full screen 
         options.add_argument('--kiosk')
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--ignore-ssl-errors')
         #user-data-dir=> to create selenium folder. 
-        # options.add_argument('--user-data-dir=selenium')
-        options.add_argument("--user-data-dir=C:/Users/phyli/AppData/Local/Google/Chrome/User Data")
+        options.add_argument('--user-data-dir=selenium') 
+        # options.add_argument("--user-data-dir=C:/Users/phyli/AppData/Local/Google/Chrome/User Data")
+        # caps = webdriver.DesiredCapabilities.CHROME.copy()
+        # caps['acceptInsecureCerts'] = True
         #using a new profile data
-        options.add_argument("profile-directory=Profile 1")
+        
+        options.add_argument("--profile-directory=Profile 1")
 
-        self.driver = webdriver.Chrome('C:\driver\chromedriver.exe', options=options)
+        self.driver = webdriver.Chrome('C:/driver/chromedriver.exe', options=options)
+        # self.driver = webdriver.Firefox('C:\driver\geckodriver.exe', options=options)
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
-        self.handle_signin(signin_url, user_info)
+        
 
     def handle_signin(self, signin_url, user_info):
         
         self.driver.get(signin_url)
+
         print("COOKIE", self.driver.get_cookies())
         try: 
             login_element = wait(self.driver, 5).until(
@@ -49,9 +55,10 @@ class HandleNow:
             print("CANNOT GET ELEMENT")
             return
         login_element.find_element_by_css_selector("button.btn-submit").click()
+        time.sleep(10)
         print("SUCCESSFULLY LOGIN!")
         self.save_cookie('cookie.pkl')
-
+        # self.driver.quit()
     def save_cookie(self, path):
         with open(path, 'wb') as filehandler:
             pickle.dump(self.driver.get_cookies(), filehandler)
@@ -204,6 +211,7 @@ class HandleNow:
                             #dont know why this one cant click for those first item? 1
                             #because the first element, it cannot click it will skip this item
                             actions.move_to_element(plus_element).click().perform()
+
                             print("CAN CLICK")
                             topping_content = {}
                             #find topping category #should wait it present and appear?

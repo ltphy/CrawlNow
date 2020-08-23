@@ -1,8 +1,0 @@
-#title-menu cannot load all => load bit by bit =>?
-#h2 class="item-restaurant-name" => name of item
-#div class="current-price" => price of item
-topping-item-price and ilabel?
-each item click is different => topping list also different
-but can be group into specifiic group if they are similar
-https://stackoverflow.com/questions/53973423/getting-value-after-button-click-with-beautifulsoup-python
-
